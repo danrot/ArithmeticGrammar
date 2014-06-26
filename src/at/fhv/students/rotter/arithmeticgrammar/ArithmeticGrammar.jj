@@ -1,0 +1,45 @@
+/**
+ * JavaCC template file created by SF JavaCC plugin 1.5.17+ wizard for JavaCC 1.5.0+
+ */options{  JDK_VERSION = "1.5";  static = true;}PARSER_BEGIN(EG1)package at.fhv.students.rotter.arithmeticgrammar;
+
+public class EG1{  public static void main(String args []) throws ParseException  {    EG1 parser = new EG1(System.in);    System.out.println("Reading from standard input...");    try    {      EG1.evaluation();    }    catch (Exception e)    {      System.out.println("NOK.");      System.out.println(e.getMessage());      EG1.ReInit(System.in);    }    catch (Error e)    {      System.out.println("Oops.");      System.out.println(e.getMessage());    }  }}PARSER_END(EG1)SKIP :{  " "| "\r"| "\t"| "\n"}
+
+TOKEN :
+{
+  < #LETTER: ["a" - "z"] >
+| < #DIGIT: ["0" - "9"] >
+| < VAR: (< LETTER >)+ >
+| < NUMBER: (< DIGIT >)+ >
+| < ASSIGN: "=" >
+| < SEMICOLON: ";" >
+| < PLUS: "+" >
+| < MINUS: "-" >
+| < MULTIPLY: "*" >
+| < DIVIDE: "/" >
+| < OPENBRACKET: "(" >
+| < CLOSEBRACKET: ")" >}void evaluation() :
+{}
+{
+  (
+    LOOKAHEAD(2)    < VAR > < ASSIGN > < NUMBER > < SEMICOLON >
+  )+
+  expr()}
+
+void expr() :
+{
+}
+{
+  term() ((< PLUS > | < MINUS >) term())* < ASSIGN >
+}
+
+void term() :
+{}
+{
+  factor() ((< MULTIPLY > | < DIVIDE >) factor())*
+}
+
+void factor() :
+{}
+{
+  < NUMBER > | < VAR > | < OPENBRACKET > expr() < CLOSEBRACKET >
+}
