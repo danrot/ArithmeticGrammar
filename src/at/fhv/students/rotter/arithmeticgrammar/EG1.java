@@ -5,6 +5,7 @@ import java.util.HashSet;
 
 public class EG1 implements EG1Constants {
   static HashSet<String> defined = new HashSet<String>();
+  static HashSet<String> used = new HashSet<String>();
 
   public static void main(String args []) throws ParseException
   {
@@ -48,6 +49,13 @@ public class EG1 implements EG1Constants {
       }
     }
     expr();
+    for (String name : defined)
+    {
+      if (!used.contains(name))
+      {
+        System.out.println("Variable " + name + " not used!");
+      }
+    }
   }
 
   static final public void expr() throws ParseException {
@@ -122,6 +130,7 @@ public class EG1 implements EG1Constants {
           System.out.println("Variable " + var.image + " has not been declared!");
           System.exit(1);
         }
+        used.add(var.image);
       break;
     case OPENBRACKET:
       jj_consume_token(OPENBRACKET);

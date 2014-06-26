@@ -6,6 +6,7 @@ import java.util.HashSet;
 
 public class EG1{
   static HashSet<String> defined = new HashSet<String>();
+  static HashSet<String> used = new HashSet<String>();
     public static void main(String args []) throws ParseException  {    EG1 parser = new EG1(System.in);    System.out.println("Reading from standard input...");    try    {      EG1.evaluation();    }    catch (Exception e)    {      System.out.println("NOK.");      System.out.println(e.getMessage());      EG1.ReInit(System.in);    }    catch (Error e)    {      System.out.println("Oops.");      System.out.println(e.getMessage());    }  }}PARSER_END(EG1)SKIP :{  " "| "\r"| "\t"| "\n"}
 
 TOKEN :
@@ -33,7 +34,16 @@ TOKEN :
       defined.add(var.image);    }
     < ASSIGN > < NUMBER > < SEMICOLON >
   )+
-  expr()}
+  expr()
+  {
+    for (String name : defined)
+    {
+      if (!used.contains(name))
+      {
+        System.out.println("Variable " + name + " not used!");
+      }
+    }
+  }}
 
 void expr() :
 {
@@ -58,6 +68,7 @@ void factor() :
   {	if (!defined.contains(var.image))	{
 	  System.out.println("Variable " + var.image + " has not been declared!");
 	  System.exit(1);	}
+	used.add(var.image);
   }
   | < OPENBRACKET > expr() < CLOSEBRACKET >
 }
