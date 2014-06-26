@@ -32,6 +32,11 @@ public class EG1 implements EG1Constants {
     label_1:
     while (true) {
       var = jj_consume_token(VAR);
+      if (defined.contains(var.image))
+      {
+        System.out.println("Variable " + var.image + " has already been declared!");
+        System.exit(2);
+      }
       defined.add(var.image);
       jj_consume_token(ASSIGN);
       jj_consume_token(NUMBER);

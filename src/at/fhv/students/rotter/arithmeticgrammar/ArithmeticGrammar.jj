@@ -27,6 +27,9 @@ TOKEN :
 {
   (
     LOOKAHEAD(2)    var = < VAR >    {
+      if (defined.contains(var.image))      {
+        System.out.println("Variable " + var.image + " has already been declared!");
+        System.exit(2);      }
       defined.add(var.image);    }
     < ASSIGN > < NUMBER > < SEMICOLON >
   )+
