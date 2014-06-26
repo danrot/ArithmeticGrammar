@@ -3,9 +3,10 @@
  */options{  JDK_VERSION = "1.5";  static = true;}PARSER_BEGIN(EG1)package at.fhv.students.rotter.arithmeticgrammar;
 
 import java.util.HashSet;
+import java.util.HashMap;
 
 public class EG1{
-  static HashSet<String> defined = new HashSet<String>();
+  static HashMap<String, Integer> variables = new HashMap<String, Integer>();
   static HashSet<String> used = new HashSet<String>();
     public static void main(String args []) throws ParseException  {    EG1 parser = new EG1(System.in);    System.out.println("Reading from standard input...");    try    {      EG1.evaluation();    }    catch (Exception e)    {      System.out.println("NOK.");      System.out.println(e.getMessage());      EG1.ReInit(System.in);    }    catch (Error e)    {      System.out.println("Oops.");      System.out.println(e.getMessage());    }  }}PARSER_END(EG1)SKIP :{  " "| "\r"| "\t"| "\n"}
 
@@ -24,51 +25,107 @@ TOKEN :
 | < OPENBRACKET: "(" >
 | < CLOSEBRACKET: ")" >}void evaluation() :
 {
-  Token var;}
+  Token var;
+  Token value;
+  int result;}
 {
   (
     LOOKAHEAD(2)    var = < VAR >    {
-      if (defined.contains(var.image))      {
+      if (variables.keySet().contains(var.image))      {
         System.out.println("Variable " + var.image + " has already been declared!");
-        System.exit(2);      }
-      defined.add(var.image);    }
-    < ASSIGN > < NUMBER > < SEMICOLON >
+        System.exit(2);      }    }
+    < ASSIGN >
+    value = < NUMBER >
+    {
+      variables.put(var.image, Integer.parseInt(value.image));    }
+    < SEMICOLON >
   )+
-  expr()
+  result = expr() < ASSIGN >
   {
-    for (String name : defined)
+    for (String name : variables.keySet())
     {
       if (!used.contains(name))
       {
         System.out.println("Variable " + name + " not used!");
       }
     }
+    System.out.println("The result is " + result);
   }}
 
-void expr() :
+int expr() :
 {
+  Token operand;
+  int value;
+  int sum;
 }
 {
-  term() ((< PLUS > | < MINUS >) term())* < ASSIGN >
+  value = term()
+  {
+    sum = value;  }
+  (
+    (
+      operand = < PLUS >
+    | operand = < MINUS >
+    )
+    value = term()
+    {
+      if (operand.image == "+")      {
+        sum += value;      }
+      else if (operand.image == "-")
+      {		sum -= value;
+      }    }
+  )*
+  {
+    return sum;  }
 }
 
-void term() :
-{}
+int term() :
 {
-  factor() ((< MULTIPLY > | < DIVIDE >) factor())*
+  Token operand;
+  int value;
+  int product;
+}
+{
+  value = factor()
+  {
+    product = value;  }
+  (
+    (
+      operand = < MULTIPLY >
+    | operand = < DIVIDE >
+    )
+    value = factor()
+    {
+      if (operand.image == "*")      {
+        product *= value;      }
+      else if (operand.image == "/")      {		product /= value;
+      }    }
+  )*
+  {	return product;
+  }
 }
 
-void factor() :
+int factor() :
 {
   Token var;
+  Token number;
+  int value;
 }
 {
-  < NUMBER >
+  number = < NUMBER >
+  {	return Integer.parseInt(number.image);
+  }
   | var = < VAR >
-  {	if (!defined.contains(var.image))	{
+  {	if (!variables.keySet().contains(var.image))	{
 	  System.out.println("Variable " + var.image + " has not been declared!");
 	  System.exit(1);	}
 	used.add(var.image);
+
+	return variables.get(var.image);
   }
-  | < OPENBRACKET > expr() < CLOSEBRACKET >
+  | < OPENBRACKET >
+  	value = expr()
+  	< CLOSEBRACKET >
+  	{	  return value;
+  	}
 }

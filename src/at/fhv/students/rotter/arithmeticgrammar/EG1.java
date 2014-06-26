@@ -2,9 +2,10 @@
 package at.fhv.students.rotter.arithmeticgrammar;
 
 import java.util.HashSet;
+import java.util.HashMap;
 
 public class EG1 implements EG1Constants {
-  static HashSet<String> defined = new HashSet<String>();
+  static HashMap<String, Integer> variables = new HashMap<String, Integer>();
   static HashSet<String> used = new HashSet<String>();
 
   public static void main(String args []) throws ParseException
@@ -30,17 +31,19 @@ public class EG1 implements EG1Constants {
 
   static final public void evaluation() throws ParseException {
   Token var;
+  Token value;
+  int result;
     label_1:
     while (true) {
       var = jj_consume_token(VAR);
-      if (defined.contains(var.image))
+      if (variables.keySet().contains(var.image))
       {
         System.out.println("Variable " + var.image + " has already been declared!");
         System.exit(2);
       }
-      defined.add(var.image);
       jj_consume_token(ASSIGN);
-      jj_consume_token(NUMBER);
+      value = jj_consume_token(NUMBER);
+      variables.put(var.image, Integer.parseInt(value.image));
       jj_consume_token(SEMICOLON);
       if (jj_2_1(2)) {
         ;
@@ -48,18 +51,24 @@ public class EG1 implements EG1Constants {
         break label_1;
       }
     }
-    expr();
-    for (String name : defined)
+    result = expr();
+    jj_consume_token(ASSIGN);
+    for (String name : variables.keySet())
     {
       if (!used.contains(name))
       {
         System.out.println("Variable " + name + " not used!");
       }
     }
+    System.out.println("The result is " + result);
   }
 
-  static final public void expr() throws ParseException {
-    term();
+  static final public int expr() throws ParseException {
+  Token operand;
+  int value;
+  int sum;
+    value = term();
+    sum = value;
     label_2:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -73,23 +82,36 @@ public class EG1 implements EG1Constants {
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case PLUS:
-        jj_consume_token(PLUS);
+        operand = jj_consume_token(PLUS);
         break;
       case MINUS:
-        jj_consume_token(MINUS);
+        operand = jj_consume_token(MINUS);
         break;
       default:
         jj_la1[1] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
-      term();
+      value = term();
+      if (operand.image == "+")
+      {
+        sum += value;
+      }
+      else if (operand.image == "-")
+      {
+                sum -= value;
+      }
     }
-    jj_consume_token(ASSIGN);
+    {if (true) return sum;}
+    throw new Error("Missing return statement in function");
   }
 
-  static final public void term() throws ParseException {
-    factor();
+  static final public int term() throws ParseException {
+  Token operand;
+  int value;
+  int product;
+    value = factor();
+    product = value;
     label_3:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -103,45 +125,62 @@ public class EG1 implements EG1Constants {
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case MULTIPLY:
-        jj_consume_token(MULTIPLY);
+        operand = jj_consume_token(MULTIPLY);
         break;
       case DIVIDE:
-        jj_consume_token(DIVIDE);
+        operand = jj_consume_token(DIVIDE);
         break;
       default:
         jj_la1[3] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
-      factor();
+      value = factor();
+      if (operand.image == "*")
+      {
+        product *= value;
+      }
+      else if (operand.image == "/")
+      {
+                product /= value;
+      }
     }
+        {if (true) return product;}
+    throw new Error("Missing return statement in function");
   }
 
-  static final public void factor() throws ParseException {
+  static final public int factor() throws ParseException {
   Token var;
+  Token number;
+  int value;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case NUMBER:
-      jj_consume_token(NUMBER);
+      number = jj_consume_token(NUMBER);
+        {if (true) return Integer.parseInt(number.image);}
       break;
     case VAR:
       var = jj_consume_token(VAR);
-        if (!defined.contains(var.image))
+        if (!variables.keySet().contains(var.image))
         {
           System.out.println("Variable " + var.image + " has not been declared!");
           System.exit(1);
         }
         used.add(var.image);
+
+        {if (true) return variables.get(var.image);}
       break;
     case OPENBRACKET:
       jj_consume_token(OPENBRACKET);
-      expr();
+      value = expr();
       jj_consume_token(CLOSEBRACKET);
+          {if (true) return value;}
       break;
     default:
       jj_la1[4] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
+    throw new Error("Missing return statement in function");
   }
 
   static private boolean jj_2_1(int xla) {
