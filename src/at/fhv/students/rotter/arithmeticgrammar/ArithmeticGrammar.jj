@@ -2,7 +2,11 @@
  * JavaCC template file created by SF JavaCC plugin 1.5.17+ wizard for JavaCC 1.5.0+
  */options{  JDK_VERSION = "1.5";  static = true;}PARSER_BEGIN(EG1)package at.fhv.students.rotter.arithmeticgrammar;
 
-public class EG1{  public static void main(String args []) throws ParseException  {    EG1 parser = new EG1(System.in);    System.out.println("Reading from standard input...");    try    {      EG1.evaluation();    }    catch (Exception e)    {      System.out.println("NOK.");      System.out.println(e.getMessage());      EG1.ReInit(System.in);    }    catch (Error e)    {      System.out.println("Oops.");      System.out.println(e.getMessage());    }  }}PARSER_END(EG1)SKIP :{  " "| "\r"| "\t"| "\n"}
+import java.util.HashSet;
+
+public class EG1{
+  static HashSet<String> defined = new HashSet<String>();
+    public static void main(String args []) throws ParseException  {    EG1 parser = new EG1(System.in);    System.out.println("Reading from standard input...");    try    {      EG1.evaluation();    }    catch (Exception e)    {      System.out.println("NOK.");      System.out.println(e.getMessage());      EG1.ReInit(System.in);    }    catch (Error e)    {      System.out.println("Oops.");      System.out.println(e.getMessage());    }  }}PARSER_END(EG1)SKIP :{  " "| "\r"| "\t"| "\n"}
 
 TOKEN :
 {
@@ -18,10 +22,13 @@ TOKEN :
 | < DIVIDE: "/" >
 | < OPENBRACKET: "(" >
 | < CLOSEBRACKET: ")" >}void evaluation() :
-{}
+{
+  Token var;}
 {
   (
-    LOOKAHEAD(2)    < VAR > < ASSIGN > < NUMBER > < SEMICOLON >
+    LOOKAHEAD(2)    var = < VAR >    {
+      defined.add(var.image);    }
+    < ASSIGN > < NUMBER > < SEMICOLON >
   )+
   expr()}
 
@@ -39,7 +46,15 @@ void term() :
 }
 
 void factor() :
-{}
 {
-  < NUMBER > | < VAR > | < OPENBRACKET > expr() < CLOSEBRACKET >
+  Token var;
+}
+{
+  < NUMBER >
+  | var = < VAR >
+  {	if (!defined.contains(var.image))	{
+	  System.out.println("Variable " + var.image + " has not been declared!");
+	  System.exit(1);	}
+  }
+  | < OPENBRACKET > expr() < CLOSEBRACKET >
 }
